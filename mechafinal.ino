@@ -48,8 +48,8 @@ const double l3 = 10.0;
 int error=0;
 int vibrate = 0;
 
-boolean servobusy = false;
-
+boolean servobusy_catcha = false;
+boolean servobusy_reset = false;
 bool handleTimePeriod( unsigned long *ptr_time, unsigned int time_period) {
     if((millis() - *ptr_time) < time_period) {
         return 1;  
@@ -148,16 +148,23 @@ void ControlShovel(PS2DATA *ps2)
   if(waiting)
   {
   static unsigned long systick_ms_bak2 = 0;
-  if(handleTimePeriod(&systick_ms_bak2, 500))return;   
+  if(handleTimePeriod(&systick_ms_bak2, 100))return;   
   waiting = false;
   }
   static int mode = 0;
-  if(ps2->GREENDELTAPRESSED) {
-    mode = (mode+1)%3;
+  if(ps2->R1PRESSED) {
+    mode += 100;
+    if(mode>1100)mode=1100;
     waiting = true;
   }
-  Controller.moveServo(0,1000+mode*500,500);
+  if(ps2->R2PRESSED) {
+    mode -=100;
+    if(mode<0)mode=0;
+    waiting = true;
+  }
+  Controller.moveServo(0,500+mode,100);
 }
+
 
 void ControlServo(PS2DATA *ps2,int speedms)
 {
@@ -322,9 +329,79 @@ void loop() {
   ReadPS2(ps2);
   DriveMotor(ps2);
   ControlShovel(ps2);
-  if(!servobusy)ControlServo(ps2,5);
-  catcha(ps2);
+  //if(!servobusy_catcha&&!servobusy_reset)ControlServo(ps2,5);
+  if(!servobusy_catcha)FastReset(ps2);
+  if(!servobusy_reset)catcha(ps2);
   storage();
+}
+void FastReset(PS2DATA *ps2){
+  static bool res_pos=0;
+  static int stepn_1 = 0;
+  static boolean flag_1 = false;
+  static unsigned long systick_ms_bak1_1 = 0;
+  if(ps2->REDSQUAREPRESSED&&(!flag_1)){
+    flag_1 = true;
+    servobusy_reset = 1;
+    systick_ms_bak1_1 = millis();
+  }
+  if(flag_1&&!res_pos)
+  {
+    if(stepn_1 == 0){
+    Controller.moveServo(5,1400,200);
+    Controller.moveServo(12,1500,200);
+  if(handleTimePeriod(&systick_ms_bak1_1, 500))return;
+  ++stepn_1;
+  }
+  if(stepn_1 == 1)
+  {
+   Controller.moveServo(2,2000,200);
+   Controller.moveServo(3,2366,200);
+  if(handleTimePeriod(&systick_ms_bak1_1, 600))return;
+  ++stepn_1;
+  }
+  if(stepn_1 ==2){
+    Controller.moveServo(12,2000,200);
+    if(handleTimePeriod(&systick_ms_bak1_1, 600))return;
+  ++stepn_1;
+}
+  if(stepn_1 == 3)
+  {
+    //if(handleTimePeriod(&systick_ms_bak1_1, 300))return;
+    flag_1 = false;
+    servobusy_reset = false;
+    stepn_1 = 0;
+    res_pos=1;
+  }
+  }
+  if(flag_1&&res_pos)
+  {
+    if(stepn_1 == 0){
+    //Controller.moveServo(5,1400,200);
+    Controller.moveServo(12,1500,200);
+  if(handleTimePeriod(&systick_ms_bak1_1, 300))return;
+  ++stepn_1;
+  }
+  if(stepn_1 == 1)
+  {
+   Controller.moveServo(2,1300,200);
+   Controller.moveServo(3,2000,200);
+  if(handleTimePeriod(&systick_ms_bak1_1, 600))return;
+  ++stepn_1;  
+  }
+  if(stepn_1 ==2){
+    Controller.moveServo(12,2000,200);
+    if(handleTimePeriod(&systick_ms_bak1_1, 1000))return;
+  ++stepn_1;
+}
+  if(stepn_1 == 3)
+  {
+    //if(handleTimePeriod(&systick_ms_bak1_1, 300))return;
+    flag_1 = false;
+    servobusy_reset = false;
+    stepn_1 = 0;
+    res_pos=0;
+  }
+  }
 }
 void catcha(PS2DATA *ps2){
   static int t=0;
@@ -333,7 +410,7 @@ void catcha(PS2DATA *ps2){
   static unsigned long systick_ms_bak1 = 0;
   if(ps2->REDCIRCLEPRESSED&&(!flag)){
     flag = true;
-    servobusy = 1;
+    servobusy_catcha = 1;
   t=(t+1)%3;
    systick_ms_bak1 = millis();
   }
@@ -379,7 +456,7 @@ void catcha(PS2DATA *ps2){
     if(handleTimePeriod(&systick_ms_bak1, 400))return;
     ++stepn;
     flag = false;
-    servobusy = false;
+    servobusy_catcha = false;
     stepn = 0;
   }
   }
