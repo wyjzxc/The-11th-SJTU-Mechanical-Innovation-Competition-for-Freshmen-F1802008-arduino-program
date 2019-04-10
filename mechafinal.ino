@@ -48,7 +48,7 @@ const double l3 = 10.0;
 int error=0;
 int vibrate = 0;
 
-boolean servobusy_catcha = false;
+boolean servobusy = false;
 boolean servobusy_reset = false;
 bool handleTimePeriod( unsigned long *ptr_time, unsigned int time_period) {
     if((millis() - *ptr_time) < time_period) {
@@ -174,11 +174,23 @@ void ControlServo(PS2DATA *ps2,int speedms)
   static double prey = 0;
   static double prez = 0;
   static double prea = 90;
+  static boolean pos_flag=0;
   static boolean state=true;
   double x;
   double y;
   double z;
   double a;
+  if(ps2->REDSQUAREPRESSED){
+    pos_flag=~pos_flag
+      if(pos_flag){
+        prex=15;
+        prez=15;
+        }
+      if(!pos_flag){
+        prex=5;
+        prez=10;
+        }
+    }
   if(!ps2->R3PRESSED)
   {
     x = prex + (127-ps2->RY)*0.005;
@@ -329,9 +341,8 @@ void loop() {
   ReadPS2(ps2);
   DriveMotor(ps2);
   ControlShovel(ps2);
-  //if(!servobusy_catcha&&!servobusy_reset)ControlServo(ps2,5);
-  if(!servobusy_catcha)FastReset(ps2);
-  if(!servobusy_reset)catcha(ps2);
+  if(!servobusy)ControlServo(ps2,5);
+  catcha(ps2);
   storage();
 }
 void FastReset(PS2DATA *ps2){
@@ -410,7 +421,7 @@ void catcha(PS2DATA *ps2){
   static unsigned long systick_ms_bak1 = 0;
   if(ps2->REDCIRCLEPRESSED&&(!flag)){
     flag = true;
-    servobusy_catcha = 1;
+    servobusy = 1;
   t=(t+1)%3;
    systick_ms_bak1 = millis();
   }
@@ -456,7 +467,7 @@ void catcha(PS2DATA *ps2){
     if(handleTimePeriod(&systick_ms_bak1, 400))return;
     ++stepn;
     flag = false;
-    servobusy_catcha = false;
+    servobusy = false;
     stepn = 0;
   }
   }
