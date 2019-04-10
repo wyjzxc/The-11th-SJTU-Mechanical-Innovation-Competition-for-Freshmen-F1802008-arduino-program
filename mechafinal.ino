@@ -181,7 +181,7 @@ void ControlServo(PS2DATA *ps2,int speedms)
   double z;
   double a;
   if(ps2->REDSQUAREPRESSED){
-    pos_flag=~pos_flag
+    pos_flag=~pos_flag;
       if(pos_flag){
         prex=15;
         prez=15;
