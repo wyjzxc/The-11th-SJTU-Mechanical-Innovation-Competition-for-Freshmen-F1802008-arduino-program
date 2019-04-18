@@ -1,9 +1,9 @@
 # The-11th-SJTU-Mechanical-Innovation-Competition-for-Freshmen-F1802008-s-arduino-program-
-F1802008's team. Leader: Jiaao Li. Electronic control leader: Haoyu Li.
-
-The Arduino program can control the vehicle's movement and achieve its function to score.
-
-functions: catch small wooden cubes, put them in vehicle's basket, pour them into score zone.catch flag.catch mines.
-特性：将5自由度机械臂通过算法控制实现在xyz方向上的控制，可以在对准方块后一键抓取并放入筐内
-有一个没有什么用但是很亮的激光瞄准具（红）
-rank:3rd
+上海交通大学机械与动力工程学院F1802008-19号队。队长兼机械组组长：李佳澳。电控组组长：李浩宇。
+特性：将5自由度机械臂通过算法控制实现在xyz方向上的控制，可以在对准方块后一键抓取并放入筐内，自动化的抓旗逻辑。
+有一个红色激光瞄准具辅助瞄准。机械爪头预留视觉/测距模块空间。
+致谢：杭州众灵科技提供计时函数，GitHub网友提供PS2库，CSDN网友提供D-H算法资料。
+L298n库原版本来自网络，后由李浩宇修改。
+所有用到的库均已传到libraries文件夹下。
+主控板采用杭州众灵科技的Arduino开发板，舵机控制板为乐幻索尔（Lobot）生产的16路舵机控制板（附二次开发资料和调试软件），电机控制板原为L298n后由其他同学提供，感谢这位同学的支持。
+自动化算法与机械臂算法说明上传至Illustration文件夹下。
